@@ -1,4 +1,5 @@
 ﻿using DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +22,7 @@ namespace EventDressRental.Controllers
         }
         // GET: api/<ModelsController>
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<FinalModels>>> Get(string? description, int? minPrice, int? maxPrice,
                     [FromQuery] int[] categoriesId, [FromQuery] string[] color, int position = 1, int skip = 8)
         {
@@ -36,6 +38,7 @@ namespace EventDressRental.Controllers
 
         // GET api/<ModelsController>/5
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<ModelDTO>> GetModelById(int id)
         {
             ModelDTO model = await _modelService.GetModelById(id);
@@ -46,6 +49,7 @@ namespace EventDressRental.Controllers
 
         // GET api/<DressesController>/10/sizes
         [HttpGet("sizes")]
+        [AllowAnonymous]
         public async Task<ActionResult<List<string>>> GetSizesByModelId(int modelId)
         {
             if (await _modelService.GetModelById(modelId) == null)
@@ -57,6 +61,7 @@ namespace EventDressRental.Controllers
 
         // GET api/<ModelsController>/5/size/10/date/0000-00-00/count
         [HttpGet("{modelId}/size/{size}/date/{date}/count")]
+        [AllowAnonymous]
         public async Task<ActionResult<int>> GetCountByModelIdAndSizeForDate(int modelId, string size, DateOnly date)
         {
             if (await _modelService.GetModelById(modelId) == null)
@@ -69,6 +74,7 @@ namespace EventDressRental.Controllers
         }
         // POST api/<ModelsController>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ModelResponseDTO>> AddModel([FromBody] NewModelDTO newModel)
         {
             if (!await _modelService.CheckCategories(newModel.CategoriesId))
@@ -82,6 +88,7 @@ namespace EventDressRental.Controllers
 
         // PUT api/<ModelsController>/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateModel(int id, [FromBody] NewModelDTO updateModel)
         {
             if (!await _modelService.CheckCategories(updateModel.CategoriesId))
@@ -97,6 +104,7 @@ namespace EventDressRental.Controllers
 
         // DELETE api/<ModelsController>/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             if (!await _modelService.IsExistsModelById(id))

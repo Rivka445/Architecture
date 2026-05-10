@@ -340,3 +340,4 @@ C:\Users\user1\Desktop\ריקי\שנה ב'\API\WebApiShop\bin\Debug\net9.0\Syste
 C:\Users\user1\Desktop\ריקי\שנה ב'\API\WebApiShop\bin\Debug\net9.0\Microsoft.Extensions.Caching.StackExchangeRedis.dll
 C:\Users\user1\Desktop\ריקי\שנה ב'\API\WebApiShop\bin\Debug\net9.0\System.Diagnostics.DiagnosticSource.dll
 C:\Users\user1\Desktop\ריקי\שנה ב'\API\WebApiShop\bin\Debug\net9.0\Microsoft.Extensions.Configuration.Binder.dll
+C:\Users\user1\Desktop\ריקי\שנה ב'\API\WebApiShop\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

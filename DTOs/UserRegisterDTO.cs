@@ -17,6 +17,8 @@ namespace DTOs
         [Phone,Required]
         string Phone,
         [Required]
-        string Password
+        string Password,
+        [Required]
+        string Role = "User"
    );
 }

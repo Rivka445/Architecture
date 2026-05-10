@@ -625,7 +625,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "DTOs.UserDTO",
+        "Type": "DTOs.AuthResponseDto",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -698,7 +698,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "DTOs.UserDTO",
+        "Type": "DTOs.AuthResponseDto",
         "MediaTypes": [
           "text/plain",
           "application/json",

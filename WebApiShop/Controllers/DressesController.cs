@@ -1,4 +1,5 @@
 ﻿using DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace EventDressRental.Controllers
 
         // GET api/<DressesController>
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<DressDTO>>> GetDresses()
         {
             List<DressDTO> dresses = await _dressService.GetDresses();
@@ -32,6 +34,7 @@ namespace EventDressRental.Controllers
 
         // GET api/<DressesController>/5
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<DressDTO>> GetDressById(int id)
         {
             DressDTO dress = await _dressService.GetDressById(id);
@@ -41,6 +44,7 @@ namespace EventDressRental.Controllers
         }
 
         [HttpGet("model/{modelId}/size/{size}")]
+        [AllowAnonymous]
         public async Task<ActionResult<DressDTO>> GetDressByModelIdAndSize(int modelId, string size)
         {
             if (await _modelService.GetModelById(modelId) == null)
@@ -52,6 +56,7 @@ namespace EventDressRental.Controllers
 
         // POST api/<DressesController>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<DressResponseDTO>> AddDress([FromBody] NewDressDTO newDress)
         {
             if (!_dressService.CheckPrice(newDress.Price))
@@ -65,6 +70,7 @@ namespace EventDressRental.Controllers
 
         // PUT api/<DressesController>/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateDress(int id, [FromBody] NewDressDTO updateDress)
         {
             if (!_dressService.CheckPrice(updateDress.Price))
@@ -82,6 +88,7 @@ namespace EventDressRental.Controllers
 
         // GET api/<DressesController>/model/{modelId}
         [HttpGet("model/{modelId}")]
+        [AllowAnonymous]
         public async Task<ActionResult<List<DressDTO>>> GetDressesByModelId(int modelId)
         {
             if (await _modelService.GetModelById(modelId) == null)
@@ -93,6 +100,7 @@ namespace EventDressRental.Controllers
 
         // DELETE api/<DressesController>/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             if (!await _dressService.IsExistsDressById(id))

@@ -1,6 +1,8 @@
 ﻿using DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services;
+using Zxcvbn;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -23,6 +25,7 @@ namespace EventDressRental.Controllers
 
         // GET: api/<UsersController>
         [HttpGet]
+        [Authorize(Roles = "Admin")]        
         public async Task<ActionResult<IEnumerable<UserDTO>>> Get()
         {
             List<UserDTO> users = await _userService.GetUsers();
@@ -33,6 +36,7 @@ namespace EventDressRental.Controllers
 
         // GET api/<UsersController>/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<UserDTO>> GetUserId(int id)
         {
             UserDTO user = await _userService.GetUserById(id);
@@ -41,7 +45,8 @@ namespace EventDressRental.Controllers
 
         // POST api/<UsersController>
         [HttpPost]
-        public async Task<ActionResult<UserDTO>> AddUser([FromBody] UserRegisterDTO newUser)
+        [AllowAnonymous]
+        public async Task<ActionResult<AuthResponseDto>> AddUser([FromBody] UserRegisterDTO newUser)
         {
             int passwordScore = _userPasswordService.CheckPassword(newUser.Password);
             if(passwordScore < 2)
@@ -49,27 +54,44 @@ namespace EventDressRental.Controllers
                 _logger.LogWarning("Registration failed: weak password for {FirstName} {LastName}", newUser.FirstName, newUser.LastName);
                 return BadRequest("Password is not strong enough");
             }
-            UserDTO user = await _userService.AddUser(newUser);
-            _logger.LogInformation("User registered successfully: {FirstName} {LastName}", user.FirstName, user.LastName);
-            return CreatedAtAction(nameof(GetUserId), new { Id = user.Id }, user);
+            AuthResponseDto user = await _userService.AddUser(newUser);
+            _logger.LogInformation("User registered successfully: {FirstName} {LastName}", user.User.FirstName, user.User.LastName);
+            Response.Cookies.Append("token", user.Token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.Now.AddDays(1)
+            });
+            return CreatedAtAction(nameof(GetUserId), new { Id = user.User.Id }, user.User);
         }
 
         // POST api/<UsersController>
         [HttpPost("login")]
-        public async Task<ActionResult<UserDTO>> LogIn([FromBody] UserLoginDTO existingUser)
+        [AllowAnonymous]
+        public async Task<ActionResult<AuthResponseDto>> LogIn([FromBody] UserLoginDTO existingUser)
         {
             _logger.LogInformation("Login attempt for {FirstName} {LastName}", existingUser.FirstName, existingUser.LastName);
-            UserDTO user = await _userService.LogIn(existingUser);
-            if(user == null)
+            AuthResponseDto user = await _userService.LogIn(existingUser);
+            if(user.User == null)
             {
                 _logger.LogWarning("Login failed for {FirstName} {LastName}", existingUser.FirstName, existingUser.LastName);
                 return Unauthorized("user name or password are wrong");
             }
-            _logger.LogInformation("Login succeeded for user {UserId} {Email}", user.Id, user.Email);
-            return Ok(user);
+            _logger.LogInformation("Login succeeded for user {UserId} {Email}", user.User.Id, user.User.Email);
+            Response.Cookies.Append("token", user.Token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.Now.AddDays(1)
+            });
+            return Ok(user.User);
         }
+
         // PUT api/<UsersController>/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> Put(int id, [FromBody] UserRegisterDTO updateUser)
         {
             if (await _userService.IsExistsUserById(id) == false)

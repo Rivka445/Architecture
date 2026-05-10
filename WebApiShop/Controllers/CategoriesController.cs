@@ -1,4 +1,5 @@
 ﻿using DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace EventDressRental.Controllers
         }
         // GET: api/<CategoriesController>
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get()
         {
             List<CategoryDTO> categories= await _categoryService.GetCategories();
@@ -28,6 +30,7 @@ namespace EventDressRental.Controllers
 
         // GET api/<CategoriesController>/5
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<CategoryDTO>> GetCategoryById(int id)
         {
             CategoryDTO categoryDTO = await _categoryService.GetCategoryId(id);
@@ -36,6 +39,7 @@ namespace EventDressRental.Controllers
 
         // POST api/<CategoriesController>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<CategoryDTO>> AddCategory([FromBody] NewCategoryDTO newCategory)
         {
             CategoryDTO category = await _categoryService.AddCategory(newCategory);
