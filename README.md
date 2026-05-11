@@ -115,33 +115,21 @@ The project is built using a **3-Layer Architecture**, which allows for easy mai
 
 ## 🐳 Docker
 
-This repository includes a production-ready multi-stage `Dockerfile` (targeting .NET 8) and an optimized `.dockerignore` to keep the build context small.
+Minimal Docker usage
 
-Quick commands to build and run the image locally:
-
-Build the image:
+Build image:
 
 ```powershell
 docker build -t eventdressrental:latest .
 ```
 
-Run the container (map port 5000 locally to container port 80):
+Run (example):
 
 ```powershell
-docker run -e "ASPNETCORE_URLS=http://+:80" -p 5000:80 --rm eventdressrental:latest
+docker run -e "ASPNETCORE_URLS=http://+:80" -e "Redis__ConnectionString=<your-redis>" -p 5000:80 --rm eventdressrental:latest
 ```
 
-Notes:
-- The Dockerfile publishes for `linux-x64` and trims unused dependencies. If you deploy to ARM (for example on Raspberry Pi or some cloud instances), change the RID accordingly.
-- Do NOT include development configuration or secrets in images. Use environment variables or a secure secret store for production settings (for example the Redis connection string).
-- The `.dockerignore` excludes `bin/`, `obj/`, `.vs/`, `appsettings.Development.json`, and logs to reduce image build size.
-
-Redis and caching:
-- The service uses `IDistributedCache` and the codebase includes optional support for StackExchange.Redis. Provide the Redis connection string via environment variables or `appsettings.Production.json` at deploy time.
-- If you run locally and want Redis for caching, you can start a Redis container:
-
-```powershell
-docker run -d --name redis -p 6379:6379 redis:7
-```
-
-Then pass the connection string to the API container at run time, e.g. `-e "Redis__ConnectionString=host.docker.internal:6379"` (or use the redis container hostname when using Docker Compose).
+Short notes:
+- Image is built with .NET 8 (see `Dockerfile`).
+- Keep secrets/config out of the image; pass via environment variables or a secret manager.
+- `.dockerignore` is included to reduce build context.
