@@ -19,6 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseNLog();
 
+builder.Services.AddScoped<IKafkaProducerService, KafkaProducerService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 

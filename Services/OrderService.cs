@@ -12,8 +12,10 @@ namespace Services
         private readonly IDressService _dressService;
         private readonly IMapper _mapper;
         private readonly ILogger<OrderService> _logger;
+        private readonly IKafkaProducerService _kafkaProducerService;
 
-        public OrderService(IOrderRepository orderRepository, IMapper mapper, IUserService userService, IDressService dressService, ILogger<OrderService> logger)
+        public OrderService(IOrderRepository orderRepository, IMapper mapper, IUserService userService, 
+            IDressService dressService, ILogger<OrderService> logger, IKafkaProducerService kafkaProducer) 
         {
             _userService = userService;
             _mapper = mapper;
@@ -21,6 +23,7 @@ namespace Services
             _userService = userService;
             _dressService = dressService;
             _logger = logger;
+            _kafkaProducerService = kafkaProducer;
         }
         public async Task<bool> IsExistsOrderById(int id)
         {
@@ -109,11 +112,22 @@ namespace Services
             return ordersDTO;
         }
         public async Task<OrderDTO> AddOrder(NewOrderDTO newOrder)
-        {
+        { 
             Order postOrder = _mapper.Map<NewOrderDTO, Order>(newOrder);
             postOrder.StatusId = 1;
             Order order = await _orderRepository.AddOrder(postOrder);
             OrderDTO orderDTO = _mapper.Map<Order, OrderDTO>(order);
+            try
+            {
+                await _kafkaProducerService.SendMessageAsync(order.Id.ToString(), orderDTO);
+
+                _logger.LogInformation("Kafka: Message sent for Order {OrderId}", order.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kafka: Failed to send message for Order {OrderId}", order.Id);
+            }
+
             return orderDTO;
         }
         public async Task UpdateStatusOrder(OrderDTO orderDto, int statusId)

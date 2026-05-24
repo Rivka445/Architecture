@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EventDressRental")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+58dca1b68d94f073edc498b4608d026e3618af30")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1601b771f0a9322e06ea19080067d356d5da10de")]
 [assembly: System.Reflection.AssemblyProductAttribute("EventDressRental")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EventDressRental")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
