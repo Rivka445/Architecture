@@ -1,4 +1,17 @@
-﻿const titleName = document.querySelector(".titleName")
+﻿async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const res = await fetch(url, options);
+            if (res.status === 429 || res.status >= 500) throw new Error(res.status);
+            return res;
+        } catch (e) {
+            if (i === retries - 1) throw e;
+            await new Promise(r => setTimeout(r, delay * Math.pow(2, i)));
+        }
+    }
+}
+
+const titleName = document.querySelector(".titleName")
 const firstName = (JSON.parse(sessionStorage.getItem("currentUser"))).firstName
 titleName.textContent = `ברוכה הבאה ${firstName} מייד נצלול פנימה`
 
@@ -15,7 +28,7 @@ async function upDate() {
     const currenrtUser = extrctDataFromInput()
     const id = Number(JSON.parse(sessionStorage.getItem("currentUser")).id)
     try {
-        const response = await fetch(
+        const response = await fetchWithRetry(
             `https://localhost:44362/api/Users/${id}`,
             {
                 method: `PUT`,
@@ -39,7 +52,7 @@ async function checkPassword() {
     let password = document.querySelector("#password").value
     const userPassword = { password }
     try {
-        const response = await fetch(
+        const response = await fetchWithRetry(
             "https://localhost:44362/api/UsersPassword", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

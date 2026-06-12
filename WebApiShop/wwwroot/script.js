@@ -1,4 +1,17 @@
 ﻿
+async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const res = await fetch(url, options);
+            if (res.status === 429 || res.status >= 500) throw new Error(res.status);
+            return res;
+        } catch (e) {
+            if (i === retries - 1) throw e;
+            await new Promise(r => setTimeout(r, delay * Math.pow(2, i)));
+        }
+    }
+}
+
 const extrctDataFromInputUser = () => {
     const email = document.querySelector("#email").value
     const firstName = document.querySelector("#firstName").value
@@ -19,7 +32,7 @@ const extrctDataFromInputLogIn = () => {
 async function registIn() {
     const newUser = extrctDataFromInputUser()
     try {
-        const response = await fetch (
+        const response = await fetchWithRetry(
             "https://localhost:44362/api/Users",{
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -42,7 +55,7 @@ async function logIn() {
     if (existUser === "")
         return
     try {
-        const response = await fetch(
+        const response = await fetchWithRetry(
             "https://localhost:44362/api/Users/login",{
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -65,7 +78,7 @@ async function checkPassword() {
     let password = document.querySelector("#password").value
     const userPassword = { password }
     try {
-        const response = await fetch(
+        const response = await fetchWithRetry(
                 "https://localhost:44362/api/UsersPassword", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
